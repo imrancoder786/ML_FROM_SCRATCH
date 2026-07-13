@@ -77,3 +77,13 @@ class FeedforwardBlock(nn.Module):
         h3 = self.dropout(h2)
         h4 = self.liner_2(h3)
         return h4 
+
+
+class MultiHeadAttentionBlock(nn.Module):
+    def __init__(self, d_model :int , h:int , dropout:float):
+        super().__init__()
+        self.d_model = d_model
+        self.h = h
+        assert d_model % h == 0 ,"d_model is not divisible by h "
+
+        self.d_k = d_model // h
