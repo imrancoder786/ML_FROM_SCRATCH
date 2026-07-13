@@ -87,3 +87,18 @@ class MultiHeadAttentionBlock(nn.Module):
         assert d_model % h == 0 ,"d_model is not divisible by h "
 
         self.d_k = d_model // h
+
+        self.w_q = nn.Linear(d_model, d_model)  # Q
+        self.w_k = nn.Linear(d_model, d_model)  # K
+        self.w_v = nn.Linear(d_model, d_model)  # V
+
+        self.w_o = nn.Linear(d_model ,d_model) # W_o
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self , q, k, v, mask): 
+        query = self.w_q(q) #(Batch, seq_len, d_model) --> (Batch, seq_Len, d_model)
+        key  = self.w_k(k) #(Batch, seq_len, d_model) --> (Batch, seq_Len, d_model)
+        value = self.w_k(v) #(Batch, seq_len, d_model) --> (Batch, seq_Len, d_model)
+
+        
+
