@@ -15,7 +15,7 @@ class InputEmbeddings(nn.Module):
         return self.embedding(x) * math.sqrt(self.d_model)
     
 
-"""
+""" 
 The positional encoding same vector size 512 only conver once and only
 computeed once and resue for the every sentence during 
 tranning and inference
@@ -47,4 +47,14 @@ class PositionalEncoding(nn.module):
         return self.dropout(x)
     
 class LayerNormalization(nn.module):
-    def __init 
+    def __init__(self , eps: float = 10 **-6):
+        super().__init__()
+        self.eps = eps
+        self.alpha = nn.parameter(torch.ones(1)) # multiplied
+        self.bias = nn.parameter(torch.zeros(1))  #added
+
+    def forward(self ,x):
+        mean = x.mean(dim = -1 ,keepdim= True)   
+        std = x.std(dim = -1 ,keepdim=True)
+
+        return self.alpha * ( x - mean ) / (std + self.eps) +self.bias
