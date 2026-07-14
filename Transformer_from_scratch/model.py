@@ -95,14 +95,41 @@ class MultiHeadAttentionBlock(nn.Module):
         self.w_o = nn.Linear(d_model ,d_model) # W_o
         self.dropout = nn.Dropout(dropout)
 
+    @staticmethod
+    def attention(query , key , value , mask , dropout: nn.Dropout):
+        d_k = query.shape[-1]
+
+        # (Batch , h, seq_len, d_k) -- > (Batch , seq_len , seq_len)
+        attention_score = query @ key.transpose(-2 , -1) / math.sqrt(d_k)  #)(-2 , -1) this chage the (seq_Len, d_model)  --> (d_model,seq_Len)
+        if mask is not None:
+            attention_score.masked_fill_(mask == 0, -1e9) # in that ware this (mask == 0 true the replace with this value -1e9
+        attention_score = attention_score.softmax(dim = -1)    #(Batch , h , seq_len,seq_len)
+        if dropout is not None:
+            attention_score = dropout(attention_score)
+
+        return (attention_score @ value) ,attention_score   # that second used for ther visualizing and dubug
+     
+
+
+
     def forward(self , q, k, v, mask): 
         query = self.w_q(q) #(Batch, seq_len, d_model) --> (Batch, seq_Len, d_model)
         key  = self.w_k(k) #(Batch, seq_len, d_model) --> (Batch, seq_Len, d_model)
-        value = self.w_k(v) #(Batch, seq_len, d_model) --> (Batch, seq_Len, d_model)
+        value = self.w_v(v) #(Batch, seq_len, d_model) --> (Batch, seq_Len, d_model)
 
         #(Bathc ,seq_len,d_model) --> (Batch,seq_len,h,d_k) -->(Batch,h, seq_len,d_k)
         query =query.view(query.shape[0] ,query.shape[1], self.h ,self.d_k).transpose(1,2)                   
         key = key.view(key.shape[0], key.shape[1] ,self.h , self.d_k).transpose(1,2)
         value = value.view(value.shape[0] ,value.shape[1] ,self.h ,self.d_k).transpose(1,2)
 
-                                              
+        x , self.attention_score = MultiHeadAttentionBlock.attention(query , key , value , mask , self.dropout)                                  
+
+        #(Batch , h , seq_len ,d_k) --> (Batch ,seq_len , d_model) --> (Batch ,seq_len , d_model)
+
+        x =x.transpose(1,2).contiguous().view(x.shape[0] , -1 ,self.h * self.d_k)
+
+        # (Batch , seq_len , d_model) --> (Batch,seq_len ,d_model)
+        return self.w_o(x)                      
+    
+
+    
