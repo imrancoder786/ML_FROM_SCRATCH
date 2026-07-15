@@ -217,4 +217,21 @@ class Transformer(nn.Module):
         return self.encoder(src , src_mask)
         
     def decoder(self,encoder_output, src_mask , tgt ,tgt_mask):
-         
+        tgt = self.tgt_embed(tgt)
+        tgt = self.tgt_pos(tgt)
+        return self.decoder(tgt , encoder_output , src_mask ,tgt_mask)
+    
+    def project(self, x):
+        return self.projection_layer(x)
+    
+
+def Build_Transformer(src_vocab_size :int , tgt_vocab_size:int, src_seq_len :int , tgt_sqe_len :int ,d_model:int =512 , N =6 , h=8 ,dropout = 0.1 , d_ff = 2048)-> Transformer :
+    # create the embedding layer 
+    src_embed =InputEmbeddings(d_model , src_vocab_size):
+    tgt_embed = InputEmbeddings(d_model , tgt_vocab_size)
+
+    #create a positional embedding layer
+    src_pos = PositionalEncoding(d_model , )
+
+
+
