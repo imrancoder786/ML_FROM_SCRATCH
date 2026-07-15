@@ -180,7 +180,7 @@ class decoderBlock(nn.Module):
             x = self.residual_connections[2] (x , self.feed_forward_bloack)
             return x
     
-class decoder (nn.Module):
+class Decoder (nn.Module):
     def __init__(self, layers:nn.ModuleList):
         super().__init__()
         self.layers = layers
@@ -191,3 +191,30 @@ class decoder (nn.Module):
             x = layer(x , encoder_output ,src_mask,tgt_mask)
         return self.norm(x) 
             
+class ProjectLayer(nn.Module):
+    def __init__(self, d_model:int , vocab_size : int ):
+        super().__init__()  
+        self.proj = nn.Linear(d_model ,vocab_size)
+
+    def forward (self ,x ):
+        # (Batxh , seq_lena , d_model) --> (batch , seq_len,vocab_size)
+        return torch.log_softmax(self.proj(x) ,dim=-1)
+
+class Transformer(nn.Module):
+    def __init__(self, encoder:Encoder , decoder:Decoder , src_embed :InputEmbeddings , tgt_embed :InputEmbeddings, src_pos: PositionalEncoding, tgt_pos:PositionalEncoding ,projection_layer:ProjectLayer):
+        super().__init__()
+        self.encoder = encoder
+        self.decoder = decoder 
+        self.src_embed = src_embed
+        self.tgt_embed = tgt_embed
+        self.src_pos = src_pos 
+        self.tgt_pos = tgt_pos
+        self.projection_layer =projection_layer
+
+    def encoder(self ,src , src_mask):
+        src = self.src_embed(src)
+        src = self.src_pos(src)
+        return self.encoder(src , src_mask)
+        
+    def decoder(self,encoder_output, src_mask , tgt ,tgt_mask):
+         
