@@ -6,6 +6,7 @@ class BilingualDataset(Dataset):
     def __init__(self , ds , tokenizer_src ,tokenizer_tgt ,src_lang ,tgt_lang ,seq_len):
         super().__init__()
 
+        self.seq_len = seq_len
         self.ds =ds
         self.tokenizer_src = tokenizer_src
         self.tokenizer_tgt = tokenizer_tgt
@@ -24,8 +25,8 @@ class BilingualDataset(Dataset):
     
     def __getitem__(self, index):
         src_target_pair =self.ds[index]
-        src_text = src_target_pair['transulation'][self.src_lang]
-        tgt_text = src_target_pair['transulation'][self.tgt_lang]
+        src_text = src_target_pair[self.src_lang]
+        tgt_text = src_target_pair[self.tgt_lang]
         
         enc_input_tokens = self.tokenizer_src.encode(src_text).ids
         dec_input_tokens = self.tokenizer_tgt.decode(tgt_text).ids

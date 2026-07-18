@@ -19,10 +19,13 @@ from pathlib import Path
 
 import tqdm
 
+import warnings
+from config import get_config
+
 
 def get_all_sentences(ds ,lang):
     for item in ds:
-        yield item['transulation'][lang]
+        yield item[lang]
 
 def get_or_build_tokenizer(config , ds ,lang):
     # this lone will create somthing like config['tokenizer_file'] = '../tokenizers/tokenizer_{0}.json'
@@ -38,7 +41,8 @@ def get_or_build_tokenizer(config , ds ,lang):
     return tokenizer
 
 def get_ds(config):
-    ds_raw = load_dataset('opus_books',f'{config["lang_src"]}-{config["lang_tgt"]}',split = 'train')
+    ds_raw = load_dataset('gopi30/english-tamil', split='train')
+
     #build tokenizer
     tokenizer_src = get_or_build_tokenizer(config , ds_raw , config['lang_src'])
     tokenizer_tgt = get_or_build_tokenizer(config , ds_raw , config['lang_tgt'])
@@ -110,10 +114,41 @@ def train_model(config):
             encoder_mask = batch['encoder_mask'].to(device) # (B ,1, 1 ,seq_len)
             decoder_mask = batch['decoder_mask '].to(device) # (b ,1 , 1 ,seq_len ,seq_len)
 
-
             #run  the tensor through the transfrmer 
             encoder_output = model.encoder(encoder_input ,encoder_mask) # (B , seq_len , d_model)
             decoder_output = model.decoder(encoder_output ,encoder_mask ,decoder_input , decoder_mask) #(B , seq_len ,d_model)
             project_output = model.project(decoder_output ) #(B ,seq_len ,tgt_vocab_size)
 
             lable = batch['lable'].to(device) # (B , seq_len) 
+
+            #(B , seq_len , tgt_vocab_zise) --> (B  * seq_len , tgt_vocab_size)
+            loss = loss_fn(project_output.view(-1 , tokenizer_tgt.get_vocab_size( )) , lable.view(-1) ) 
+            batch_iterator.set_postfix({f'loss' : f'{loss.item():6.3f}'})
+
+            #log the loss
+            writer.add_scalar('train loss' , loss.item() ,global_step)
+            writer.flush()
+
+            # backpropagation 
+            loss.backward()
+
+            # update the  weights
+            optimizer.step()
+            optimizer.zero_grad()
+
+            global_step += 1
+
+        # save model
+        model_filename = get_weight_file_path(config , f'{epoch:02d}')
+        torch.save({
+            'epoch' : epoch,
+            "model_state_dict" : model.state_dict(),
+            "optimizer_state_dict" : optimizer.state_dict(),
+            'global_step' : global_step
+        }, model_filename)
+
+if __name__ =="__main__" :
+    warnings.filterwarnings('ignore')
+    config = get_config()
+    train_model(config)
+

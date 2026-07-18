@@ -9,7 +9,7 @@ def get_config():
         "seq_len" :350, # that data set this for  thee italy
         "d_model" : 512,
         "lang_src" : "en",
-        "lang_tgt" : "it",
+        "lang_tgt" : "ta",
         "model_folder" :"weights" ,
         "model_filename" : "tmodel_",
         "preload" : None ,

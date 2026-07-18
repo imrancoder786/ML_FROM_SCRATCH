@@ -20,7 +20,7 @@ The positional encoding same vector size 512 only conver once and only
 computeed once and resue for the every sentence during 
 tranning and inference
 """ 
-class PositionalEncoding(nn.module):
+class PositionalEncoding(nn.Module):
 
     def __inti__(self, d_model:int , seq_length:int ,dropout:float):
         super().__init__()
@@ -46,7 +46,7 @@ class PositionalEncoding(nn.module):
         x = x + (self.pe[:, :x.shape[1] , :]).requires_grad_(False)  # so that model not learning this for handling the srq_;enght and inductive bias , to produce ne w and diffreent lenght of the word 
         return self.dropout(x)
     
-class LayerNormalization(nn.module):
+class LayerNormalization(nn.Module):
     def __init__(self , eps: float = 10 **-6):
         super().__init__()
         self.eps = eps
@@ -142,7 +142,7 @@ class ResidualConnection(nn.Module):
         return x + self.dropout(sublayer(self.norm(x)))
     
     
-class EncoderBlock(nn.module):
+class EncoderBlock(nn.Module):
     def __init__(self,self_attention_block :MultiHeadAttentionBlock , feed_forward_black:FeedforwardBlock , dropout: float):
         super().__init__()
         self.self_attention_block = MultiHeadAttentionBlock
