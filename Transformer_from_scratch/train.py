@@ -52,7 +52,7 @@ def get_ds(config):
     val_ds_size = len(ds_raw) - train_ds_size
     train_ds_size ,val_ds_size = random_split(ds_raw,[train_ds_size ,val_ds_size])
 
-    train_ds = BilingualDataset(train_ds_size , tokenizer_src , tokenizer_tgt ,config[['lang_src'] , config['lang_tgt'] , config['seq_len']])
+    train_ds = BilingualDataset(train_ds_size , tokenizer_src , tokenizer_tgt ,config['lang_src'] , config['lang_tgt'] , config['seq_len'])
     val_ds = BilingualDataset(val_ds_size , tokenizer_src , tokenizer_tgt ,config[['lang_src'] , config['lang_tgt'] , config['seq_len']])
 
     max_len_src = 0
