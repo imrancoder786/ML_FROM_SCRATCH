@@ -11,7 +11,7 @@ class InputEmbeddings(nn.Module):
         self.vocab_size = vocab_size
         self.embedding = nn.Embedding(vocab_size , d_model)
 
-    def forword(self, x): #(embedding)vector of size 512
+    def forward(self, x): #(embedding)vector of size 512
         return self.embedding(x) * math.sqrt(self.d_model)
     
 
