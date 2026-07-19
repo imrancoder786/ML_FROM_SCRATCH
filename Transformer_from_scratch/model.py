@@ -18,7 +18,7 @@ class InputEmbeddings(nn.Module):
 """ 
 The positional encoding same vector size 512 only conver once and only
 computeed once and resue for the every sentence during 
-tranning and inference
+tranning and inferencep
 """ 
 class PositionalEncoding(nn.Module):
 
@@ -26,7 +26,7 @@ class PositionalEncoding(nn.Module):
         super().__init__()
         self.d_model = d_model
         self.seq_lenght = seq_length
-        self.dropout = dropout
+        self.dropout = nn.Dropout(dropout)
 
         #create a matrix of shape (seq_len , d_model)
         pe = torch.zeros(seq_length , d_model)
