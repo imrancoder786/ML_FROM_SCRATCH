@@ -116,11 +116,11 @@ def train_model(config):
             decoder_mask = batch['decoder_mask'].to(device) # (b ,1 , 1 ,seq_len ,seq_len)
 
             #run  the tensor through the transfrmer 
-            encoder_output = model.encoder(encoder_input ,encoder_mask) # (B , seq_len , d_model)
-            decoder_output = model.decoder(encoder_output ,encoder_mask ,decoder_input , decoder_mask) #(B , seq_len ,d_model)
+            encoder_output = model.encode(encoder_input ,encoder_mask) # (B , seq_len , d_model)
+            decoder_output = model.decode(encoder_output ,encoder_mask ,decoder_input , decoder_mask) #(B , seq_len ,d_model)
             project_output = model.project(decoder_output ) #(B ,seq_len ,tgt_vocab_size)
 
-            lable = batch['lable'].to(device) # (B , seq_len) 
+            lable = batch['label'].to(device) # (B , seq_len) 
 
             #(B , seq_len , tgt_vocab_zise) --> (B  * seq_len , tgt_vocab_size)
             loss = loss_fn(project_output.view(-1 , tokenizer_tgt.get_vocab_size( )) , lable.view(-1) ) 
