@@ -16,10 +16,11 @@ class BilingualDataset(Dataset):
         to make the all tensor are the same size of the padding ex( 24 ,20,8) --> if we use the seq_len 5 
         then 5 - 3 =2 so we add the two somthing maaybe to 0  ( 24 ,20,8 ,0 ,0)
         """
-        self.sos_token =torch.Tensor([tokenizer_src.token_to_id(['[SOS]'])],dtype = torch.int64)
-        self.eos_token =torch.Tensor([tokenizer_src.token_to_id(['[EOS]'])],dtype = torch.int64)
-        self.pad_token =torch.Tensor([tokenizer_src.token_to_id(['[PAD]'])],dtype = torch.int64)
 
+        self.sos_token = torch.tensor([tokenizer_src.token_to_id('[SOS]')], dtype = torch.int64)
+        self.eos_token = torch.tensor([tokenizer_src.token_to_id('[EOS]')], dtype = torch.int64)
+        self.pad_token = torch.tensor([tokenizer_src.token_to_id('[PAD]')], dtype = torch.int64)
+  
     def __len__(self):
         return len(self.ds)
     
@@ -29,7 +30,7 @@ class BilingualDataset(Dataset):
         tgt_text = src_target_pair[self.tgt_lang]
         
         enc_input_tokens = self.tokenizer_src.encode(src_text).ids
-        dec_input_tokens = self.tokenizer_tgt.decode(tgt_text).ids
+        dec_input_tokens = self.tokenizer_tgt.encode(tgt_text).ids
 
         enc_num_padding_tokens = self.seq_len - len(enc_input_tokens) -2
         dec_num_padding_tokens = self.seq_len - len(dec_input_tokens) -1
@@ -72,9 +73,9 @@ class BilingualDataset(Dataset):
             ]
         )  
 
-        assert encoder_input.size(0) == self.seq_Len
-        assert decoder_input.size(0) == self.seq_Len
-        assert lable.size(0) == self.seq_Len
+        assert encoder_input.size(0) == self.seq_len
+        assert decoder_input.size(0) == self.seq_len
+        assert lable.size(0) == self.seq_len
 
         return {
             "encoder_input" :encoder_input, #(seq_len)

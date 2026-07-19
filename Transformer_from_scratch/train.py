@@ -17,7 +17,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from pathlib import Path
 
-import tqdm
+from tqdm import tqdm
 
 import warnings
 from config import get_config
@@ -53,14 +53,15 @@ def get_ds(config):
     train_ds_size ,val_ds_size = random_split(ds_raw,[train_ds_size ,val_ds_size])
 
     train_ds = BilingualDataset(train_ds_size , tokenizer_src , tokenizer_tgt ,config['lang_src'] , config['lang_tgt'] , config['seq_len'])
-    val_ds = BilingualDataset(val_ds_size , tokenizer_src , tokenizer_tgt ,config[['lang_src'] , config['lang_tgt'] , config['seq_len']])
+    val_ds = BilingualDataset(val_ds_size , tokenizer_src , tokenizer_tgt ,config['lang_src'] , config['lang_tgt'] , config['seq_len'])
 
     max_len_src = 0
     max_len_tgt = 0 
 
     for item in ds_raw:
-        src_ids = tokenizer_src.encode(item['transulation'] [config['lang_src']]).ids
-        tgt_ids = tokenizer_src.encode(item['transulation'] [config['lang_tgt']]).ids
+       
+        src_ids = tokenizer_src.encode(item[config['lang_src']]).ids
+        tgt_ids = tokenizer_tgt.encode(item[config['lang_tgt']]).ids
         max_len_src =max(max_len_src , len(src_ids))
         max_len_tgt = max(max_len_tgt , len(tgt_ids))
 
@@ -89,7 +90,7 @@ def train_model(config):
     #tensorboard
     writer = SummaryWriter(config['experiment_name'])
 
-    optimizer  = torch.optim.adam(model.parameters() , lr = config['lr'] , eps = 1e-9)
+    optimizer  = torch.optim.Adam(model.parameters() , lr = config['lr'] , eps = 1e-9)
 
     # used to resume the model if creashed while on tranning
     initial_epoch = 0
@@ -112,7 +113,7 @@ def train_model(config):
             encoder_input = batch['encoder_input'].to(device) #(B ,seq_len)
             decoder_input = batch['decoder_input'].to(device) #(b ,seq_len)
             encoder_mask = batch['encoder_mask'].to(device) # (B ,1, 1 ,seq_len)
-            decoder_mask = batch['decoder_mask '].to(device) # (b ,1 , 1 ,seq_len ,seq_len)
+            decoder_mask = batch['decoder_mask'].to(device) # (b ,1 , 1 ,seq_len ,seq_len)
 
             #run  the tensor through the transfrmer 
             encoder_output = model.encoder(encoder_input ,encoder_mask) # (B , seq_len , d_model)

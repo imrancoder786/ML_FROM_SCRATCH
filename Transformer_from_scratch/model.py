@@ -22,7 +22,7 @@ tranning and inference
 """ 
 class PositionalEncoding(nn.Module):
 
-    def __inti__(self, d_model:int , seq_length:int ,dropout:float):
+    def __init__(self, d_model:int , seq_length:int ,dropout:float):
         super().__init__()
         self.d_model = d_model
         self.seq_lenght = seq_length
@@ -46,12 +46,14 @@ class PositionalEncoding(nn.Module):
         x = x + (self.pe[:, :x.shape[1] , :]).requires_grad_(False)  # so that model not learning this for handling the srq_;enght and inductive bias , to produce ne w and diffreent lenght of the word 
         return self.dropout(x)
     
+    
+    
 class LayerNormalization(nn.Module):
     def __init__(self , eps: float = 10 **-6):
         super().__init__()
         self.eps = eps
-        self.alpha = nn.parameter(torch.ones(1)) # multiplied
-        self.bias = nn.parameter(torch.zeros(1))  #added
+        self.alpha = nn.Parameter(torch.ones(1)) # multiplied
+        self.bias = nn.Parameter(torch.zeros(1))  #added
 
     def forward(self ,x):
         mean = x.mean(dim = -1 ,keepdim= True)   
