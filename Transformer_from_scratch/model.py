@@ -38,7 +38,7 @@ class PositionalEncoding(nn.Module):
         pe[: , 0::2]  = torch.sin(position  * div_term)
         pe[: , 1::2]  = torch.cos(position * div_term)
 
-        pe = pe.squeeze(0) # that become the (1,seq_lenth , d_model)
+        pe = pe.unsqueeze(0) # that become the (1,seq_lenth , d_model)
 
         self.register_buffer('pe' , pe)  # that used if we want tge model to save but not as a parameter.
 
