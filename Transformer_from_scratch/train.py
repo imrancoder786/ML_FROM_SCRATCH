@@ -154,6 +154,10 @@ def train_model(config):
 
     train_dataloader ,val_dataloader ,tokenizer_src , tokenizer_tgt  = get_ds(config)
     model = get_model(config , tokenizer_src.get_vocab_size() , tokenizer_tgt.get_vocab_size()).to(device)
+    # for data parallel
+    if torch.cuda.device_count() > 1:
+            print(f"Using {torch.cuda.device_count()} GPUs for training!")
+            model = nn.DataParallel(model)
     #tensorboard
     writer = SummaryWriter(config['experiment_name'])
 
@@ -183,10 +187,13 @@ def train_model(config):
             encoder_mask = batch['encoder_mask'].to(device) # (B ,1, 1 ,seq_len)
             decoder_mask = batch['decoder_mask'].to(device) # (b ,1 , 1 ,seq_len ,seq_len)
 
-            #run  the tensor through the transfrmer 
-            encoder_output = model.encode(encoder_input ,encoder_mask) # (B , seq_len , d_model)
-            decoder_output = model.decode(encoder_output ,encoder_mask ,decoder_input , decoder_mask) #(B , seq_len ,d_model)
-            project_output = model.project(decoder_output ) #(B ,seq_len ,tgt_vocab_size)
+            #run  the tensor through the transfrmer (this code is the single gpu code)
+            # encoder_output = model.encode(encoder_input ,encoder_mask) # (B , seq_len , d_model)
+            # decoder_output = model.decode(encoder_output ,encoder_mask ,decoder_input , decoder_mask) #(B , seq_len ,d_model)
+            # project_output = model.project(decoder_output ) #(B ,seq_len ,tgt_vocab_size)
+
+            # NEW (Triggers DataParallel across both T4 GPUs):
+            project_output = model(encoder_input, decoder_input, encoder_mask, decoder_mask)
 
             lable = batch['label'].to(device) # (B , seq_len) 
 
@@ -211,12 +218,13 @@ def train_model(config):
 
         # save model
         model_filename = get_weight_file_path(config , f'{epoch:02d}')
+        
         torch.save({
-            'epoch' : epoch,
-            "model_state_dict" : model.state_dict(),
-            "optimizer_state_dict" : optimizer.state_dict(),
-            'global_step' : global_step
-        }, model_filename)
+                'epoch' : epoch,
+                "model_state_dict" : model.module.state_dict() if isinstance(model, nn.DataParallel) else model.state_dict(),
+                "optimizer_state_dict" : optimizer.state_dict(),
+                'global_step' : global_step
+            }, model_filename)
 
 if __name__ =="__main__" :
     warnings.filterwarnings('ignore')

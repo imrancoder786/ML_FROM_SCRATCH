@@ -226,6 +226,12 @@ class Transformer(nn.Module):
     def project(self, x):
         return self.projection_layer(x)
     
+    # added for to applay the DataParllel
+    def forward(self, encoder_input, decoder_input, encoder_mask, decoder_mask):
+        encoder_output = self.encode(encoder_input, encoder_mask)
+        decoder_output = self.decode(encoder_output, encoder_mask, decoder_input, decoder_mask)
+        return self.project(decoder_output)
+    
 
 def Build_Transformer(src_vocab_size :int , tgt_vocab_size:int, src_seq_len :int , tgt_sqe_len :int ,d_model:int =512 , N =6 , h=8 ,dropout = 0.1 , d_ff = 2048)-> Transformer :
     # create the embedding layer 
