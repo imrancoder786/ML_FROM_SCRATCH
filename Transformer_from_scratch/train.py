@@ -113,9 +113,9 @@ def get_ds(config):
     ds_raw = ds_raw.filter(
         lambda x: 0 < len(x[config['lang_src']].split()) <= 150 and 0 < len(x[config['lang_tgt']].split()) <= 150
     )
-    ds_raw = ds_raw.shuffle(seed=42).select(range(300000))
-    if len(ds_raw) > 300000:
-            ds_raw = ds_raw.select(range(300000))
+    ds_raw = ds_raw.shuffle(seed=42).select(range(200000))
+    if len(ds_raw) > 200000:
+            ds_raw = ds_raw.select(range(200000))
 
     print(f"Clean Dataset size: {len(ds_raw)} pairs")
 
