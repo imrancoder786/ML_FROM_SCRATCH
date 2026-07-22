@@ -109,6 +109,7 @@ def get_or_build_tokenizer(config , ds ,lang):
 
 def get_ds(config):
     ds_raw = load_dataset('gopi30/english-tamil', split='train')
+    ds_raw = ds_raw.shuffle(seed=42).select(range(500000))
 
     #build tokenizer
     tokenizer_src = get_or_build_tokenizer(config , ds_raw , config['lang_src'])
