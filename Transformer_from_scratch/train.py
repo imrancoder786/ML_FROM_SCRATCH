@@ -109,7 +109,16 @@ def get_or_build_tokenizer(config , ds ,lang):
 
 def get_ds(config):
     ds_raw = load_dataset('gopi30/english-tamil', split='train')
+    print("Filtering dataset for clean sentences...")
+    ds_raw = ds_raw.filter(
+        lambda x: 0 < len(x[config['lang_src']].split()) <= 150 and 0 < len(x[config['lang_tgt']].split()) <= 150
+    )
     ds_raw = ds_raw.shuffle(seed=42).select(range(500000))
+    if len(ds_raw) > 500000:
+            ds_raw = ds_raw.select(range(500000))
+
+    print(f"Clean Dataset size: {len(ds_raw)} pairs")
+
 
     #build tokenizer
     tokenizer_src = get_or_build_tokenizer(config , ds_raw , config['lang_src'])
