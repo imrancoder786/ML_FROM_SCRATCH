@@ -28,10 +28,13 @@ class BilingualDataset(Dataset):
         src_target_pair =self.ds[index]
         src_text = src_target_pair[self.src_lang]
         tgt_text = src_target_pair[self.tgt_lang]
-        
-        enc_input_tokens = self.tokenizer_src.encode(src_text).ids
-        dec_input_tokens = self.tokenizer_tgt.encode(tgt_text).ids
 
+        # Encode and truncate the tokens to fit within the seq_len      
+        # We leave room for the SOS/EOS tokens
+        enc_input_tokens = self.tokenizer_src.encode(src_text).ids[:self.seq_len - 2]
+        dec_input_tokens = self.tokenizer_tgt.encode(tgt_text).ids[:self.seq_len - 1]
+
+        # Calculate padding (this will now always be 0 or greater)
         enc_num_padding_tokens = self.seq_len - len(enc_input_tokens) -2
         dec_num_padding_tokens = self.seq_len - len(dec_input_tokens) -1
 

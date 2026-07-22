@@ -90,13 +90,6 @@ def run_validation(model ,validation_ds , tokenizer_src ,tokenizer_tgt ,max_len 
                 break
             
 
-
-
-
-
-        
-
-
 def get_all_sentences(ds ,lang):
     for item in ds:
         yield item[lang]
