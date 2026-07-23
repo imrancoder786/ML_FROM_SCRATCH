@@ -25,6 +25,9 @@ from config import get_config
 
 
 def greedy_decode(model ,  source ,source_mask  ,tokenizer_src , tokenizer_tgt , max_len , device):
+    if isinstance(model, nn.DataParallel):
+        model = model.module
+
     sos_idex = tokenizer_tgt.token_to_id('[SOS]')
     eos_idex = tokenizer_tgt.token_to_id('[EOS]')
 
